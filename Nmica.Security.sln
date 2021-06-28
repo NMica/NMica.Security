@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMica.AspNetCore.Authentication.Spnego", "src\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj", "{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nmica.SecurityProxy", "src\Nmica.SecurityProxy\Nmica.SecurityProxy.csproj", "{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "samples\SampleApp\SampleApp.csproj", "{09024E7F-2F7F-4422-AE55-CA74AD70F777}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E845100F-0250-42EE-A93C-69956BD560E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9BF9078F-679B-4127-8E60-887FA03622BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KerberosUtil", "src\KerberosUtil\KerberosUtil.csproj", "{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09024E7F-2F7F-4422-AE55-CA74AD70F777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09024E7F-2F7F-4422-AE55-CA74AD70F777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09024E7F-2F7F-4422-AE55-CA74AD70F777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09024E7F-2F7F-4422-AE55-CA74AD70F777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B} = {E845100F-0250-42EE-A93C-69956BD560E0}
+		{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE} = {E845100F-0250-42EE-A93C-69956BD560E0}
+		{09024E7F-2F7F-4422-AE55-CA74AD70F777} = {9BF9078F-679B-4127-8E60-887FA03622BE}
+		{F7E97C3F-8E92-42E4-BB23-9532277BBBD1} = {E845100F-0250-42EE-A93C-69956BD560E0}
+	EndGlobalSection
+EndGlobal

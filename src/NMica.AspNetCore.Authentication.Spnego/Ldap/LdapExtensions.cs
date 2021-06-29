@@ -1,21 +1,21 @@
 using System.Collections.Generic;
-using Novell.Directory.Ldap;
+using System.DirectoryServices.Protocols;
+using System.Linq;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
     internal static class LdapExtensions
     {
-        public static string GetSidString(this LdapEntry entry) => new SecurityIdentifier(entry.GetAttribute("objectSid").ByteValue, 0).Value;
-        public static string[] GetStringArray(this LdapEntry entry, string attribute)
+        public static string GetSidString(this SearchResultEntry entry) => 
+            new SecurityIdentifier(entry.Attributes["objectSid"].GetValues(typeof(byte[])).Cast<byte[]>().First(), 0).Value;
+
+        public static string GetAttributeValue(this SearchResultEntry entry, string attribute)
         {
-            try
-            {
-                return entry.GetAttribute(attribute).StringValueArray;
-            }
-            catch (KeyNotFoundException)
-            {
-                return System.Array.Empty<string>();
-            }
+            return entry.Attributes[attribute].GetValues(typeof(string)).Cast<string>().Single();
+        }
+        public static string[] GetStringArray(this SearchResultEntry entry, string attribute)
+        {
+            return entry.Attributes[attribute]?.GetValues(typeof(string)).Cast<string>().ToArray() ?? System.Array.Empty<string>();
         }
     }
 }

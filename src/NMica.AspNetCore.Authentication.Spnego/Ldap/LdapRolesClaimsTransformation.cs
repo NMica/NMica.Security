@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.DirectoryServices;
+using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Security.Authentication;
 using System.Security.Claims;
@@ -12,7 +15,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using Novell.Directory.Ldap;
+using SearchScope = System.DirectoryServices.Protocols.SearchScope;
+
+// using Novell.Directory.Ldap;
+// using LdapConnection = Novell.Directory.Ldap.LdapConnection;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
@@ -21,7 +27,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
     /// </summary>
     public class LdapRolesClaimsTransformer : IStartupFilter, IClaimsTransformation
     {
-        private readonly ReaderWriterLockSlim _lock = new();
+        private readonly SemaphoreSlim _lock = new(1);
         private readonly ILogger<LdapRolesClaimsTransformer> _logger;
         private Dictionary<string, string> _sidsToGroupNames = new();
         private Dictionary<string, List<string>> _groupSidHierarchy = new();
@@ -29,18 +35,20 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
         private Timer? _refreshTimer;
         private readonly IOptionsMonitor<LdapOptions> _options;
         private bool _isInitialized = false;
+        private LdapConnection _connection;
 
         public string Name { get; }
 
 
         public LdapRolesClaimsTransformer(
             IOptionsMonitor<LdapOptions> options,
-            string name = "",
-            ILogger<LdapRolesClaimsTransformer>? logger = null)
+            ILogger<LdapRolesClaimsTransformer> logger,
+            string name = "")
         {
             Name = name;
             _options = options;
-            _logger ??= NullLogger<LdapRolesClaimsTransformer>.Instance;
+            _logger = logger;
+            _connection = new LdapConnection(new LdapDirectoryIdentifier("")); // will be set properly during initialize call
         }
 
         private void Initialize()
@@ -55,8 +63,10 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             try
             {
                 var options = _options.Get(Name);
-                RefreshGroups(options);
-                _refreshTimer = new Timer(_ => CheckGroupChanges(), null, options.RefreshFrequency, options.RefreshFrequency);
+                _connection = GetConnection(options);
+                Task.Run(() => RefreshGroups(options)).ConfigureAwait(false);
+                _refreshTimer?.Dispose();
+                _refreshTimer = new Timer(_ => Task.Run(CheckGroupChanges), null, options.RefreshFrequency, options.RefreshFrequency);
             }
             catch (OptionsValidationException e)
             {
@@ -65,28 +75,28 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             }
         }
 
-        private void RefreshGroups(LdapOptions options)
+        private async Task RefreshGroups(LdapOptions options)
         {
 
             try
             {
 
-                using var cn = GetConnection(options);
-
                 var attributes = new[]{"objectSid", "sAMAccountName", "distinguishedName","memberOf"};
-                var query = new SearchOptions(options.GroupsQuery!, LdapConnection.ScopeSub, options.GroupsFilter, attributes, false, new LdapSearchConstraints());
-                var groups = cn.SearchUsingSimplePaging(query, 1000);
+                var searchRequest = new SearchRequest(options.GroupsQuery!, options.GroupsFilter, SearchScope.Subtree, attributes);
+                var groups = await PerformPagedSearch(searchRequest);
+                
                 _lastRefreshTime = DateTime.UtcNow;
                 var dc = Regex.Match(options.GroupsQuery!,@"DC=.+").Value;
                 var builtinQuery = $"CN=Builtin,{dc}";
-                var builtinGroups = cn.SearchUsingSimplePaging(new SearchOptions(builtinQuery, LdapConnection.ScopeSub, options.GroupsFilter, attributes, false, new LdapSearchConstraints()), 1000);
+                searchRequest = new SearchRequest(builtinQuery, options.GroupsFilter, SearchScope.Subtree, attributes);
+                var builtinGroups = await PerformPagedSearch(searchRequest);
                 var groupsByDn = groups
                     .Concat(builtinGroups)
                     .Select(x => new SimpleGroup
                     {
                         Sid = x.GetSidString(),
-                        sAMAccountName = x.GetAttribute("sAMAccountName").StringValue,
-                        DistinguishedName = x.GetAttribute("distinguishedName").StringValue,
+                        sAMAccountName = x.GetAttributeValue("sAMAccountName"),
+                        DistinguishedName = x.GetAttributeValue("distinguishedName"),
                         MemberOfDNs = x.GetStringArray("memberOf")
                     })
                     .ToDictionary(x => x.DistinguishedName);
@@ -154,7 +164,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
                 try
                 {
-                    AcquireWriteLock();
+                    _lock.Release();
                     _sidsToGroupNames = simpleGroups.ToDictionary(x => x.Sid, x => x.sAMAccountName);
                     // 4. convert groupHierarchy to sid based mapping
                     _groupSidHierarchy = groupDnHierarchy.ToDictionary(kv => groupsByDn[kv.Key].Sid, kv => kv.Value.Select(x => groupsByDn[x].Sid).ToList());
@@ -164,16 +174,16 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
                 }
                 finally
                 {
-                    _lock.ExitWriteLock();
+                    _lock.Release();
                 }
             }
             catch (Exception e)
             {
-                throw new AuthenticationException("Failed to load groups from LDAP", e);
+                _logger.LogError("Failed to load groups from LDAP\n{Error}", e);
             }
         }
 
-        private void CheckGroupChanges()
+        private async Task CheckGroupChanges()
         {
             try
             {
@@ -181,44 +191,53 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
                 var updatesFilter = $"(&{options.GroupsFilter}(whenChanged>={_lastRefreshTime:yyyyMMddHHmmss}.0Z))";
                 var attributes = new[] {"objectSid"};
                 _logger.LogTrace("Checking if LDAP groups have changed");
-                using var cn = GetConnection(options);
-                var query = new SearchOptions(options.GroupsQuery!, LdapConnection.ScopeSub, updatesFilter, attributes, false, new LdapSearchConstraints());
-                var isUpdated = cn.SearchUsingSimplePaging(query, 1).Any();
+
+                var searchRequest = new SearchRequest(options.GroupsQuery!, updatesFilter, SearchScope.Subtree, attributes);
+                searchRequest.Controls.Add(new PageResultRequestControl(1));
+                var searchResponse = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
+                    _connection.BeginSendRequest,
+                    _connection.EndSendRequest,
+                    searchRequest,
+                    PartialResultProcessing.NoPartialResultSupport,
+                    null);
+
+                var isUpdated = searchResponse.Entries.Count > 0;
                 if (isUpdated)
                 {
                     _logger.LogInformation("Detected changes to LDAP groups since last refresh");
-                    RefreshGroups(options);
+                    await RefreshGroups(options);
                 }
             }
             catch (OptionsValidationException)
             {
                 // ignore (validation will be handled by callback of config change)
             }
-
+            catch (Exception e)
+            {
+                _logger.LogError("Failed to check for group changes\n{Error}", e);
+            }
         }
 
         private LdapConnection GetConnection(LdapOptions options)
         {
-            var cn = new LdapConnection();
-            cn.Connect(options.Host, options.Port);
-            cn.Bind(options.Credentials!.UserName, options.Credentials.Password);
-            return cn;
+            var di = new LdapDirectoryIdentifier(server: options.Host, fullyQualifiedDnsHostName: true, connectionless: false);
+            var connection = new LdapConnection(di, options.Credentials);
+            connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
+            connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
+            connection.Timeout = TimeSpan.FromMinutes(1);
+            connection.AutoBind = true;
+            connection.Bind();
+            return connection;
         }
 
-        private void AcquireWriteLock()
+        private async Task AcquireLock()
         {
-            while (!_lock.TryEnterWriteLock(TimeSpan.FromMilliseconds(100)))
+            while (!await _lock.WaitAsync(TimeSpan.FromMilliseconds(100)))
             {
                 Thread.Yield();
             }
         }
-        private void AcquireReadLock()
-        {
-            while (!_lock.TryEnterReadLock(TimeSpan.FromMilliseconds(100)))
-            {
-                Thread.Yield();
-            }
-        }
+       
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
@@ -230,7 +249,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             };
         }
 
-        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             var options = _options.Get(Name);
             if (!_isInitialized)
@@ -239,10 +258,10 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             }
             if (principal.Identity == null || options.Claims == DirectoryClaims.None)
             {
-                return Task.FromResult(principal);
+                return principal;
             }
 
-            AcquireReadLock();
+            await AcquireLock();
             try
             {
                 if (options.Claims.HasFlag(DirectoryClaims.Groups))
@@ -250,17 +269,17 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
                     ReplaceGroupSidsWithNames(principal);
                 }
 
-                EnrichUserAttributeClaims(principal, options);
+                await EnrichUserAttributeClaims(principal, options);
 
-                return Task.FromResult(principal);
+                return principal;
             }
             finally
             {
-                _lock.ExitReadLock();
+                _lock.Release();
             }
         }
 
-        private void EnrichUserAttributeClaims(ClaimsPrincipal principal, LdapOptions options)
+        private async Task EnrichUserAttributeClaims(ClaimsPrincipal principal, LdapOptions options)
         {
             var userSid = principal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
 
@@ -285,9 +304,17 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
             var attributesToLoad = attributesMap.Select(x => x.LdapAttribute).ToArray();
 
-            var cn = GetConnection(options);
-            var searchResults = cn.Search(options.UsersQuery!, LdapConnection.ScopeSub, $"(objectSid={userSid})", attributesToLoad , false, new LdapSearchConstraints());
-            var userLdapEntry = searchResults.FirstOrDefault();
+            
+            var searchRequest = new SearchRequest(options.UsersQuery, $"(objectSid={userSid})", SearchScope.Subtree, attributesToLoad);
+            var searchResponse = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
+                _connection.BeginSendRequest,
+                _connection.EndSendRequest,
+                searchRequest,
+                PartialResultProcessing.NoPartialResultSupport,
+                null);
+
+
+            var userLdapEntry = searchResponse.Entries.Cast<SearchResultEntry>().FirstOrDefault();
             if (userLdapEntry == null)
             {
                 _logger.LogWarning("Unable to enrich user with claims as LDAP search for user's sid produced no results");
@@ -295,12 +322,21 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             }
 
             var identity = (ClaimsIdentity)principal.Identity!;
-            var usersAttributes = userLdapEntry.GetAttributeSet();
+            var usersAttributes = userLdapEntry.Attributes;
             foreach (var (attributeName, flag, claim) in attributesMap)
             {
-                if (usersAttributes.TryGetValue(attributeName, out var attribute))
+                if (usersAttributes.Contains(attributeName))
                 {
-                    identity.AddClaim(new Claim(claim,  attribute.StringValue));
+                    var attribute = usersAttributes[attributeName];
+                    foreach (var attributeValue in attribute)
+                    {
+                        if (attributeValue == null)
+                        {
+                            continue;
+                        }
+                        identity.AddClaim(new Claim(claim, attributeValue.ToString()!));
+                    }
+                    
                 }
             }
         }
@@ -335,6 +371,51 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             {
                 identity.RemoveClaim(claim);
             }
+        }
+        
+        private async Task<List<SearchResultEntry>> PerformPagedSearch(SearchRequest searchRequest)
+        {
+            List<SearchResultEntry> results = new List<SearchResultEntry>();
+
+            PageResultRequestControl prc = new PageResultRequestControl(1000);
+            //add the paging control
+            searchRequest.Controls.Add(prc);
+            int pages = 0;
+            while (true)
+            {
+                pages++;
+                var response = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
+                    _connection.BeginSendRequest,
+                    _connection.EndSendRequest,
+                    searchRequest,
+                    PartialResultProcessing.NoPartialResultSupport,
+                    null);
+
+                //find the returned page response control
+                foreach (DirectoryControl control in response.Controls)
+                {
+                    if (control is PageResultResponseControl)
+                    {
+                        //update the cookie for next set
+                        prc.Cookie = ((PageResultResponseControl) control).Cookie;
+                        break;
+                    }
+                }
+
+                //add them to our collection
+                foreach (SearchResultEntry sre in response.Entries)
+                {
+                    results.Add(sre);
+                }
+
+                //our exit condition is when our cookie is empty
+                if ( prc.Cookie.Length == 0 )
+                {
+                    _logger.LogWarning("Warning GetAllAdSdsp exiting in paged search wtih cookie = zero and page count = {Pages}  and user count = {UserCount}", pages, results.Count);
+                    break;
+                }
+            }
+            return results;
         }
 
         private struct SimpleGroup

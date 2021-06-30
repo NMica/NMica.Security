@@ -105,6 +105,7 @@ namespace NMica.SecurityProxy
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseForwardedHeaders(new ForwardedHeadersOptions() { ForwardedHeaders = ForwardedHeaders.XForwardedProto });
+            app.UseIdentityServer();
             app.UseCertificateForwarding();
             if (env.IsDevelopment())
             {
@@ -113,6 +114,8 @@ namespace NMica.SecurityProxy
 
             app.UseAuthentication();
             app.UseRouting();
+            
+
             app.UseAuthorization();
             // Register the reverse proxy routes
             app.UseEndpoints(endpoints =>

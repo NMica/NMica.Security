@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Steeltoe.Security.Authentication.CloudFoundry;
+using Steeltoe.Extensions.Configuration.Placeholder;
 
 namespace NMica.SecurityProxy
 {
@@ -14,10 +14,11 @@ namespace NMica.SecurityProxy
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((context, cfg) => cfg
-                    .AddYamlFile("appsettings.yaml", true)
-                    .AddYamlFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.yaml", true)
-                    .AddCloudFoundryContainerIdentity())
+                .ConfigureAppConfiguration((context, cfg) =>
+                    cfg
+                        .AddYamlFile("appsettings.yaml", true)
+                        .AddYamlFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.yaml", true)
+                        .AddPlaceholderResolver())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

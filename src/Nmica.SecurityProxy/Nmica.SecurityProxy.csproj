@@ -9,14 +9,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj" />
-      <PackageReference Include="IdentityServer4" Version="4.1.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.7" />
+      <PackageReference Include="AspNetCore.Authentication.ApiKey" Version="5.1.0" />
+      <PackageReference Include="IdentityServer4" Version="4.1.2" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
-      <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.0.2" />
+      <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="3.1.0" />
+      <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.1.0" />
       <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.11.21223.5" />
     </ItemGroup>
     <ItemGroup>
-      <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest"/>
+      <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" />
       <None Update="appsettings.*.yaml" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 

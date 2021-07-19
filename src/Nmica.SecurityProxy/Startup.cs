@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using AspNetCore.Authentication.ApiKey;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NMica.AspNetCore.Authentication.Spnego;
-using NMica.SecurityProxy.Authentication;
+using NMica.SecurityProxy.Authentication.ApiKey;
+using NMica.SecurityProxy.Authentication.Forwarding;
 using NMica.SecurityProxy.Jwt;
 using NMica.SecurityProxy.Middleware;
 using NMica.SecurityProxy.Middleware.Transforms;
@@ -49,7 +51,7 @@ namespace NMica.SecurityProxy
                     options.AuthenticationSchemes.Add(SpnegoAuthenticationDefaults.AuthenticationScheme);
                     options.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                 })
-                .AddCloudFoundryIdentityCertificate()
+                // .AddCloudFoundryIdentityCertificate()
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters()
@@ -64,7 +66,11 @@ namespace NMica.SecurityProxy
                 .AddSpnego(options =>
                 {
                     Configuration.GetSection("Spnego").Bind(options);
-                });
+                })
+                .AddApiKey("X-API-KEY", Configuration.GetValue<string>("ApiKey"));
+            
+            services.AddCloudFoundryCertificateAuth();
+
 
             if (Environment.IsDevelopment())
             {
@@ -84,13 +90,16 @@ namespace NMica.SecurityProxy
                     bearer.TokenValidationParameters.IssuerSigningKey = jwt.CurrentValue.SigningKey;
                 });
 
+            // services.AddAuthorization(opt => opt
+            //     .AddPolicy("SameSpace", policy => policy
+            //         .SameSpace() // allow any app in current cf space to authenticate via mtls
+            //         .AddAuthenticationSchemes(CertificateAuthenticationDefaults.AuthenticationScheme)));
+
             services.AddAuthorization(opt => opt
-                .AddPolicy("SameSpace", policy => policy
-                    .SameSpace() // allow any app in current cf space to authenticate via mtls
-                    .AddAuthenticationSchemes(CertificateAuthenticationDefaults.AuthenticationScheme)));
+                .AddPolicy("ValidApiKey", policy => policy
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes(ApiKeyDefaults.AuthenticationScheme)));
 
-
-            services.AddCloudFoundryContainerIdentity(Configuration);
             services.AddSingleton<ITransformFactory, IdentityTransformFactory>();
             services.AddSingleton<KerberosTicketAppender>();
             services.AddSingleton<JwtPrincipalAppender>();
@@ -111,10 +120,8 @@ namespace NMica.SecurityProxy
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseAuthentication();
             app.UseRouting();
-            
 
             app.UseAuthorization();
             // Register the reverse proxy routes

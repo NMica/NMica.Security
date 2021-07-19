@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+      <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
       <PackageReference Include="Kerberos.NET" Version="4.5.105" />
       <PackageReference Include="System.DirectoryServices" Version="5.0.0" />
       <PackageReference Include="System.DirectoryServices.Protocols" Version="5.0.0" />

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -18,7 +19,8 @@ namespace SampleApp.Controllers
             _context = httpContextAccessor.HttpContext;
         }
 
-        public string Index()
+        [Route("/headers")]
+        public string Headers()
         {
             string identity = "Anonymous";
             if (_context.Request.Headers.TryGetValue("X-CF-Identity", out var identityVal))
@@ -40,10 +42,10 @@ namespace SampleApp.Controllers
 
         [Authorize(policy: "jwt")]
         [Route("/jwt")]
-        public object Jwt()
+        public IEnumerable<(string,string)> Jwt()
         {
             var identity = (ClaimsIdentity)_context.User.Identity;
-            return identity.Claims.Select(x => new {x.Type, x.Value});
+            return identity.Claims.Select(x => (x.Type, x.Value));
         }
     }
 }

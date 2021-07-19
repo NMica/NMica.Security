@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMica.AspNetCore.Authentication.Spnego", "src\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj", "{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nmica.SecurityProxy", "src\Nmica.SecurityProxy\Nmica.SecurityProxy.csproj", "{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nmica.SecurityProxy", "src\Nmica.SecurityProxy\NMica.SecurityProxy.csproj", "{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "samples\SampleApp\SampleApp.csproj", "{09024E7F-2F7F-4422-AE55-CA74AD70F777}"
 EndProject
@@ -11,6 +11,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9BF9078F-679B-4127-8E60-887FA03622BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KerberosUtil", "src\KerberosUtil\KerberosUtil.csproj", "{F7E97C3F-8E92-42E4-BB23-9532277BBBD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{D2864383-5659-44F2-9E79-7E003EFBE3D1}"
+ProjectSection(SolutionItems) = preProject
+	README.md = README.md
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

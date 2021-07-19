@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace NMica.SecurityProxy.Authentication
+namespace NMica.SecurityProxy.Authentication.Forwarding
 {
     public class ForwardingAuthenticationHandler : AuthenticationHandler<ForwardingAuthenticationOptions>
     {

@@ -1,4 +1,4 @@
-﻿namespace NMica.SecurityProxy.Authentication
+﻿namespace NMica.SecurityProxy.Authentication.Forwarding
 {
     public static class ForwardingAuthenticationDefaults
     {

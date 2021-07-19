@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
 using System.Linq;
-using System.Security.Authentication;
 using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,7 +11,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
 
@@ -220,12 +217,17 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
         private LdapConnection GetConnection(LdapOptions options)
         {
-            var di = new LdapDirectoryIdentifier(server: options.Host, fullyQualifiedDnsHostName: true, connectionless: false);
+            var di = new LdapDirectoryIdentifier(server: options.Host, options.Port, fullyQualifiedDnsHostName: true, connectionless: false);
             var connection = new LdapConnection(di, options.Credentials);
             connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);
             connection.AutoBind = true;
+            connection.SessionOptions.SecureSocketLayer = options.UseSsl;
+            if (!options.ValidateServerCertificate)
+            {
+                connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
+            }
             connection.Bind();
             return connection;
         }
@@ -256,7 +258,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             {
                 throw new InvalidOperationException($"{GetType().Name} has not been initialized");
             }
-            if (principal.Identity == null || options.Claims == DirectoryClaims.None)
+            if (principal.Identity == null || options.Claims.Count == 0)
             {
                 return principal;
             }
@@ -264,7 +266,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             await AcquireLock();
             try
             {
-                if (options.Claims.HasFlag(DirectoryClaims.Groups))
+                if (options.Claims.Any(x => x.LdapAttribute == "memberof"))
                 {
                     ReplaceGroupSidsWithNames(principal);
                 }
@@ -287,16 +289,8 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             {
                 return;
             }
-
-            var attributesMap = new []
-            {
-                (LdapAttribute: "mail", Flag: DirectoryClaims.Email, ClaimType: ClaimTypes.Email),
-                (LdapAttribute: "sn", Flag: DirectoryClaims.FamilyName, ClaimType: ClaimTypes.Surname),
-                (LdapAttribute: "givenName", Flag: DirectoryClaims.GivenName, ClaimType: ClaimTypes.GivenName),
-            }
-            .Where(x => options.Claims.HasFlag(x.Flag))
-            .ToArray();
-
+            
+            var attributesMap = options.Claims.Where(x => x.LdapAttribute != "memberof").ToArray();
             if (!attributesMap.Any())
             {
                 return;
@@ -323,18 +317,25 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
             var identity = (ClaimsIdentity)principal.Identity!;
             var usersAttributes = userLdapEntry.Attributes;
-            foreach (var (attributeName, flag, claim) in attributesMap)
+            foreach (var claimMapping in attributesMap)
             {
-                if (usersAttributes.Contains(attributeName))
+                if (usersAttributes.Contains(claimMapping.LdapAttribute))
                 {
-                    var attribute = usersAttributes[attributeName];
+                    var attribute = usersAttributes[claimMapping.LdapAttribute];
                     foreach (var attributeValue in attribute)
                     {
                         if (attributeValue == null)
                         {
                             continue;
                         }
-                        identity.AddClaim(new Claim(claim, attributeValue.ToString()!));
+
+                        var attributeValueStr = attributeValue switch
+                        {
+                            byte[] bytes => Encoding.UTF8.GetString(bytes),
+                            string str => str,
+                            object other => other.ToString()
+                        };
+                        identity.AddClaim(new Claim(claimMapping.ClaimType, attributeValueStr!));
                     }
                     
                 }
@@ -411,7 +412,6 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
                 //our exit condition is when our cookie is empty
                 if ( prc.Cookie.Length == 0 )
                 {
-                    _logger.LogWarning("Warning GetAllAdSdsp exiting in paged search wtih cookie = zero and page count = {Pages}  and user count = {UserCount}", pages, results.Count);
                     break;
                 }
             }

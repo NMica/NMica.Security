@@ -1,5 +1,5 @@
 Logging:
   LogLevel:
-    Default: Information
-    Microsoft: Warning
+    Default: Debug
+    Microsoft: Trace
     Microsoft.Hosting.Lifetime: Information

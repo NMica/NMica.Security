@@ -1,0 +1,40 @@
+{
+	"info": {
+		"_postman_id": "5d6b928b-967f-4cfd-847b-34e99bcdf26a",
+		"name": "NMica.Security",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Egress GET",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Host",
+						"value": "httpbin2.org",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"get"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

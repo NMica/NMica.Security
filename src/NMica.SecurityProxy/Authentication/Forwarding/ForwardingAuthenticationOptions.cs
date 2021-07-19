@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
 
-namespace NMica.SecurityProxy.Authentication
+namespace NMica.SecurityProxy.Authentication.Forwarding
 {
     public class ForwardingAuthenticationOptions : AuthenticationSchemeOptions
     {

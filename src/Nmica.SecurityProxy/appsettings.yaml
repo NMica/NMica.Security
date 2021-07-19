@@ -1,26 +1,38 @@
 ﻿#Urls: http://localhost:5000;https://localhost:5001
 Logging:
   LogLevel:
-    Default: Trace
+    Default: Information
     Microsoft.Hosting.Lifetime: Information
 Spnego:
   Credentials:
     UserName: iwasvc
     Domain: almirex.dc
-    Password: New0rder
+    Password: P@ssw0rd
   Kerberos:
     Kdc: ad.almirex.com
   Ldap:
-    Claims: Groups, GivenName, FamilyName
-    Host: ad.almirex.com
-    GroupsQuery: CN=Users,DC=almirex,DC=dc
-    GroupsFilter: (objectClass=group)
-    UsersQuery: CN=Users,DC=almirex,DC=dc
-    Credentials:
-      UserName: iwasvc
-      Domain: almirex.dc
-      Password: New0rder
-    RefreshFrequency: '00:00:10'
+    Claims: # see System.Security.Claims.ClaimTypes for standard claim types constants or use your own
+      - LdapAttribute: givenName
+        ClaimType: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname
+      - LdapAttribute: sn
+        ClaimType: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
+      - LdapAttribute: email
+        ClaimType: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+      - LdapAttribute: memberof
+        ClaimType: http://schemas.microsoft.com/ws/2008/06/identity/claims/role
+    Host: ad.almirex.com # LDAP server 
+    Port: 636
+    UseSsl: true
+    ValidateServerCertificate: false
+    GroupsQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for where groups should be loaded
+    GroupsFilter: (objectClass=group) # LDAP filter to groups
+    UsersQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for users
+    Credentials: # LDAP credentials (defaults to same as SPN credentials)
+      UserName: ${Spnego:Credentials:UserName}
+      Domain: ${Spnego:Credentials:Domain}
+      Password: ${Spnego:Credentials:Password}
+    RefreshFrequency: '00:00:10' # how often should LDAP be checked for changed in AD groups membership 
+ApiKey: mykey
 Jwt:
   SigningKey: |
     -----BEGIN RSA PRIVATE KEY-----
@@ -50,10 +62,25 @@ Jwt:
     B9PrV/s7WfGoEnMO++TpC3DEc6cvRcTmjLd2CeeYpiwi382MA==
     -----END RSA PRIVATE KEY-----
 Proxy:
-  Mode: route-service
   Routes: # Routes tell the proxy which requests to forward
-    AnyIngressRequest:
-      ClusterId: dynamic
+    IngressStaticDestination:
+      ClusterId: httpbin
+      AuthorizationPolicy: default
+      Match:
+        Hosts:
+          - httpbin.org
+      Transforms:
+        - AuthorizationScheme: Bearer # issue JWT tokens with caller's identity
+    EgressStaticDestination:
+      ClusterId: httpbin
+      AuthorizationPolicy: ValidApiKey
+      Match:
+        Hosts:
+          - httpbin.local
+      Transforms:
+        - AuthorizationScheme: Negotiate # acquires and appends Kerberos tickets
+    IngressCloudFoundryRouteService:
+      ClusterId: cloud-foundry-route-service
       AuthorizationPolicy: default
       Match:
         Path: '{**catch-all}'
@@ -61,25 +88,14 @@ Proxy:
           - Name: X-CF-Forwarded-Url
             Mode: Exists
       Transforms:
-        - AuthorizationScheme: Bearer
-    EchoEgressRequest:
-      ClusterId: my-external-site
-      AuthorizationPolicy: SameSpace
-      Match:
-        Hosts:
-          - httpbin.org
-      Transforms:
-        - AuthorizationScheme: Negotiate
-        - RemoveHeader: X-Forwarded-Client-Cert
-        - RemoveHeader: X-Forwarded-Host
-        - RemoveHeader: X-Original-Proto
+        - AuthorizationScheme: Bearer # Serializes established security principal into JWT and appends as Authorization: Bearer to forwarding request
   Clusters: # Clusters tell the proxy where and how to forward requests
-    dynamic:
+    httpbin:
+      Destinations:
+        httpbin/1:
+          Address: https://httpbin.org
+    cloud-foundry-route-service: # special cluster that selects destinations from HTTP header injected by Cloud Foundry GoRouter
       Destinations:
         any-url:
           Metadata:
             Type: route-service
-    my-external-site:
-      Destinations:
-        my-external-site/destination1:
-          Address: https://httpbin.org

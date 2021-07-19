@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
@@ -13,6 +12,9 @@ using Kerberos.NET.Configuration;
 using Kerberos.NET.Credentials;
 using Kerberos.NET.Crypto;
 using Kerberos.NET.Entities;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace KerberosUtil
 {
@@ -33,35 +35,49 @@ namespace KerberosUtil
                     "Password for the client principal") {Required = true},
                 new Option<string>(
                     "--spn",
-                    "Destination service account or SPN. Ex http/myservice.domain.com") {Required = true}
+                    "Destination service account or SPN. Ex http/myservice.domain.com") {Required = true},
+                new Option<bool>(
+                    "--start-server", 
+                    "Instead of sending ticket to STDOUT, runs a local HTTP service which can be used to obtain tickets")
             };
-            getTicketCommand.Handler = CommandHandler.Create<string,string,string,string>(async(kdc, user, password, spn) =>
+            getTicketCommand.Handler = CommandHandler.Create<string,string,string,string,bool>(async(kdc, user, password, spn, startServer) =>
             {
-                var split = user.Split("@");
-                if (split.Length != 2)
+                async Task<string> GetTicket()
                 {
-                    throw new Exception("User must be in <user>@<domain> format");
+                    var split = user.Split("@");
+                    if (split.Length != 2)
+                    {
+                        throw new Exception("User must be in <user>@<domain> format");
+                    }
+
+                    var domain = split[1];
+                    var config = Krb5Config.Default();
+
+                    config.Realms[domain.ToUpper()].Kdc.Add(kdc);
+                    var client = new KerberosClient(config);
+
+
+                    var kerbCred = new KerberosPasswordCredential(user, password);
+                    await client.Authenticate(kerbCred);
+
+                    var ticket = await client.GetServiceTicket(spn);
+                    var ticket64 = Convert.ToBase64String(ticket.EncodeGssApi().ToArray());
+                    return ticket64;
                 }
 
-                var domain = split[1];
-                var config = Krb5Config.Default();
-                var realmConfig = new Krb5RealmConfig();
-                var kdcList = new List<string> {kdc};
-                // realmConfig.GetType().GetProperty(nameof(realmConfig.Kdc)).SetValue(realmConfig, kdcList);
-                // var realms = new Dictionary<string, Krb5RealmConfig>();
-                // realms.Add(domain.ToUpper(), realmConfig);
-                // config.GetType().GetProperty(nameof(config.Realms)).SetValue(config, realms);
-                config.Realms[domain.ToUpper()].Kdc.Add(kdc);
-                var client = new KerberosClient(config);
-                
-                
-                var kerbCred = new KerberosPasswordCredential(user, password);
-                await client.Authenticate(kerbCred);
-
-                var ticket = await client.GetServiceTicket(spn);
-                var ticket64 = Convert.ToBase64String(ticket.EncodeGssApi().ToArray());
-                Console.WriteLine(ticket64);
-                
+                if (startServer)
+                {
+                    await new WebHostBuilder()
+                        .UseUrls("http://localhost:5022")
+                        .UseKestrel()
+                        .Configure(a => a.Run(async r => await r.Response.WriteAsync(await GetTicket())))
+                        .Build()
+                        .RunAsync();
+                }
+                else
+                {
+                    Console.WriteLine(await GetTicket());
+                }
             });
             
             var validateTicket = new Command("validate-ticket")

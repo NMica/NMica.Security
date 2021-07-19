@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
     public class LdapOptions
     {
-        public DirectoryClaims Claims { get; set; } = DirectoryClaims.All;
+        public List<ClaimMapping> Claims { get; set; } = new();
         public string? Host { get; set; }
         public int Port { get; set; } = 389;
+        public bool UseSsl { get; set; } = false;
+        public bool ValidateServerCertificate { get; set; } = true; 
         public NetworkCredential? Credentials { get; set; } = new();
         public string GroupsFilter { get; set; } = "(objectClass=group)";
         public string? GroupsQuery { get; set; }

@@ -52,7 +52,7 @@ namespace SampleApp
             services.AddAuthorization(opt => opt.AddPolicy("jwt", policy => policy.RequireAuthenticatedUser()));
             
             services.AddHttpContextAccessor();
-            services.AddCloudFoundryActuators();
+            services.AddAllActuators();
             services.AddControllers();
             services.AddProxy();
         }

@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
-      <PackageReference Include="Steeltoe.Extensions.Logging.DynamicLogger" Version="3.0.1" />
-      <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="3.0.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
+      <PackageReference Include="Steeltoe.Extensions.Logging.DynamicLogger" Version="3.1.0" />
+      <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="3.1.0" />
         <PackageReference Include="ProxyKit" Version="2.0.4" />
 
     </ItemGroup>

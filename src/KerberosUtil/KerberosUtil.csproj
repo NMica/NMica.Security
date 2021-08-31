@@ -6,8 +6,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Kerberos.NET" Version="4.5.16" />
+      <PackageReference Include="Kerberos.NET" Version="4.5.115" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20253.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj" />
     </ItemGroup>
 
 </Project>

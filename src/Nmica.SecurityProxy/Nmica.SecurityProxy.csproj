@@ -11,7 +11,7 @@
       <ProjectReference Include="..\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj" />
       <PackageReference Include="AspNetCore.Authentication.ApiKey" Version="5.1.0" />
       <PackageReference Include="IdentityServer4" Version="4.1.2" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="3.1.0" />
       <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.1.0" />

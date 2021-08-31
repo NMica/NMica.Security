@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMica.AspNetCore.Authentication.Spnego", "src\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj", "{77FCB483-EDE9-4972-BFB0-EB0BA36B6E2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nmica.SecurityProxy", "src\Nmica.SecurityProxy\NMica.SecurityProxy.csproj", "{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMica.SecurityProxy", "src\NMica.SecurityProxy\NMica.SecurityProxy.csproj", "{D9437C5A-FE1F-4BDF-9E05-3E04141DF7DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "samples\SampleApp\SampleApp.csproj", "{09024E7F-2F7F-4422-AE55-CA74AD70F777}"
 EndProject

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using IdentityServer4;
 using Microsoft.AspNetCore.Http;
-using Yarp.ReverseProxy.Service.RuntimeModel.Transforms;
+using Yarp.ReverseProxy.Transforms;
 
 namespace NMica.SecurityProxy.Middleware.Transforms
 {

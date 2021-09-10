@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Kerberos.NET.Credentials;
 using Microsoft.Extensions.Options;
 using NMica.AspNetCore.Authentication.Spnego;
-using Yarp.ReverseProxy.Service.RuntimeModel.Transforms;
+using Yarp.ReverseProxy.Transforms;
 
 namespace NMica.SecurityProxy.Middleware.Transforms
 {

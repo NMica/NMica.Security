@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Yarp.ReverseProxy.Abstractions.Config;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace NMica.SecurityProxy.Middleware.Transforms
 {

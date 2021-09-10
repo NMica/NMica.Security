@@ -17,7 +17,7 @@
 				"header": [
 					{
 						"key": "Host",
-						"value": "httpbin2.org",
+						"value": "httpbin.local",
 						"type": "text"
 					}
 				],
@@ -34,7 +34,57 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Ingress Static GET",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest('http://localhost:5022', (err, response) => {\r",
+							"    var ticket = response.text()\r",
+							"    pm.request.headers.remove(\"Authorization\");\r",
+							"    authorizationHeader = pm.request.headers.add({key:\"Authorization\", value: \"Negotiate \" + ticket});\r",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Host",
+						"value": "httpbin.org",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Negotiate abc",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/get",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"get"
+					]
+				}
+			},
+			"response": []
 		}
-	],
-	"protocolProfileBehavior": {}
+	]
 }

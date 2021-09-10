@@ -19,7 +19,7 @@ using NMica.SecurityProxy.Middleware;
 using NMica.SecurityProxy.Middleware.Transforms;
 using Steeltoe.Security.Authentication.CloudFoundry;
 using Steeltoe.Security.Authentication.Mtls;
-using Yarp.ReverseProxy.Abstractions.Config;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace NMica.SecurityProxy
 {

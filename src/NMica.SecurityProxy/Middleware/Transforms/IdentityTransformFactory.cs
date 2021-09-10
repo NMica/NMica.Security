@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using NMica.AspNetCore.Authentication.Spnego;
-using Yarp.ReverseProxy.Abstractions.Config;
+using Yarp.ReverseProxy.Transforms.Builder;
 
 namespace NMica.SecurityProxy.Middleware.Transforms
 {

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Yarp.ReverseProxy.Service.RuntimeModel.Transforms;
+using Yarp.ReverseProxy.Transforms;
 
 namespace NMica.SecurityProxy.Middleware.Transforms
 {

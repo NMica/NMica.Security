@@ -15,7 +15,7 @@
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="3.1.0" />
       <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.1.0" />
-      <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.11.21223.5" />
+      <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.12.21451.3" />
     </ItemGroup>
     <ItemGroup>
       <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" />

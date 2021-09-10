@@ -166,4 +166,4 @@ For egress scenarios, when proxy and calling apps are both running on the platfo
 ## Testing via Postman
 Normally when using browser on domain joined machine, a Kerberos ticket will be automatically obtained by the browser from the OS and attached to the header. You can however craft a manual request with Postman. A collection of sample requests is provided as a Postman collection you can import, which can be found in `samples` directory.
 
-Note that some requests obtain Kerberos ticket via Postman pre-request script. It requires that you run `dotnet run get-ticket --start-server` with rest of the arguments specific to your AD environment. This will allow postman to automatically acquire and attach Kerberos tickets from the started web service.
+As some sample requests require a valid Kerberos ticket, a Postman pre-request script is used to obtain one and attach it to outgoing requests automatically. It acquires if from a utility webserver that can be launched from `KerberosUtil` project. It requires that you run `dotnet run get-ticket --start-server` with rest of the arguments specific to your AD environment. 

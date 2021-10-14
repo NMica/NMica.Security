@@ -71,7 +71,6 @@ namespace NMica.SecurityProxy
             
             services.AddCloudFoundryCertificateAuth();
 
-
             if (Environment.IsDevelopment())
             {
                 // permit self signed mock pcf certs in local dev environments

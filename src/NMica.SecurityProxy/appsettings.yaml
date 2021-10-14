@@ -62,40 +62,44 @@ Jwt:
     B9PrV/s7WfGoEnMO++TpC3DEc6cvRcTmjLd2CeeYpiwi382MA==
     -----END RSA PRIVATE KEY-----
 Proxy:
+  Mode: route-service
   Routes: # Routes tell the proxy which requests to forward
-    IngressStaticDestination:
-      ClusterId: httpbin
+    AuthenticateRoute:
+      ClusterId: dynamic
       AuthorizationPolicy: default
       Match:
-        Hosts:
-          - httpbin.org
+        Path: 'authenticate'
       Transforms:
-        - AuthorizationScheme: Bearer # issue JWT tokens with caller's identity
-    EgressStaticDestination:
-      ClusterId: httpbin
-      AuthorizationPolicy: ValidApiKey
+        - AuthorizationScheme: Bearer
+    JWTRoute:
+      ClusterId: dynamic
+      AuthorizationPolicy: default
       Match:
-        Hosts:
-          - httpbin.local
+        Path: 'jwt'
       Transforms:
-        - AuthorizationScheme: Negotiate # acquires and appends Kerberos tickets
-    IngressCloudFoundryRouteService:
-      ClusterId: cloud-foundry-route-service
+        - AuthorizationScheme: Bearer
+    AdminRoute:
+      ClusterId: dynamic
       AuthorizationPolicy: default
       Match:
         Path: '{**catch-all}'
-        Headers:
-          - Name: X-CF-Forwarded-Url
-            Mode: Exists
+        Methods: ["PUT", "POST", "DELETE"]
       Transforms:
-        - AuthorizationScheme: Bearer # Serializes established security principal into JWT and appends as Authorization: Bearer to forwarding request
+        - AuthorizationScheme: Bearer
+    PublicRoute:
+      ClusterId: dynamic
+      AuthorizationPolicy: Anonymous
+      Match:
+        Path: '{**catch-all}'
   Clusters: # Clusters tell the proxy where and how to forward requests
-    httpbin:
-      Destinations:
-        httpbin/1:
-          Address: https://httpbin.org
-    cloud-foundry-route-service: # special cluster that selects destinations from HTTP header injected by Cloud Foundry GoRouter
+    dynamic:
       Destinations:
         any-url:
+          Metadata:
+            Type: route-service
+    cls:
+      Destinations:
+        api:
+          Address: "https://httpbin.org"
           Metadata:
             Type: route-service

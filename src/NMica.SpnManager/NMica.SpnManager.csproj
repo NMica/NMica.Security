@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+        <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
+        <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="3.1.0" />
+
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" />
+        <None Update="appsettings.*.yaml" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>

@@ -80,13 +80,13 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
                 var attributes = new[]{"objectSid", "sAMAccountName", "distinguishedName","memberOf"};
                 var searchRequest = new SearchRequest(options.GroupsQuery!, options.GroupsFilter, SearchScope.Subtree, attributes);
-                var groups = await PerformPagedSearch(searchRequest);
+                var groups = await _connection.PerformPagedSearch(searchRequest);
                 
                 _lastRefreshTime = DateTime.UtcNow;
                 var dc = Regex.Match(options.GroupsQuery!,@"DC=.+").Value;
                 var builtinQuery = $"CN=Builtin,{dc}";
                 searchRequest = new SearchRequest(builtinQuery, options.GroupsFilter, SearchScope.Subtree, attributes);
-                var builtinGroups = await PerformPagedSearch(searchRequest);
+                var builtinGroups = await _connection.PerformPagedSearch(searchRequest);
                 var groupsByDn = groups
                     .Concat(builtinGroups)
                     .Select(x => new SimpleGroup
@@ -223,7 +223,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);
             connection.AutoBind = true;
-            connection.SessionOptions.SecureSocketLayer = options.UseSsl;
+            // connection.SessionOptions.SecureSocketLayer = options.UseSsl;
             if (!options.ValidateServerCertificate)
             {
                 connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
@@ -374,49 +374,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             }
         }
         
-        private async Task<List<SearchResultEntry>> PerformPagedSearch(SearchRequest searchRequest)
-        {
-            List<SearchResultEntry> results = new List<SearchResultEntry>();
-
-            PageResultRequestControl prc = new PageResultRequestControl(1000);
-            //add the paging control
-            searchRequest.Controls.Add(prc);
-            int pages = 0;
-            while (true)
-            {
-                pages++;
-                var response = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
-                    _connection.BeginSendRequest,
-                    _connection.EndSendRequest,
-                    searchRequest,
-                    PartialResultProcessing.NoPartialResultSupport,
-                    null);
-
-                //find the returned page response control
-                foreach (DirectoryControl control in response.Controls)
-                {
-                    if (control is PageResultResponseControl)
-                    {
-                        //update the cookie for next set
-                        prc.Cookie = ((PageResultResponseControl) control).Cookie;
-                        break;
-                    }
-                }
-
-                //add them to our collection
-                foreach (SearchResultEntry sre in response.Entries)
-                {
-                    results.Add(sre);
-                }
-
-                //our exit condition is when our cookie is empty
-                if ( prc.Cookie.Length == 0 )
-                {
-                    break;
-                }
-            }
-            return results;
-        }
+        
 
         private struct SimpleGroup
         {

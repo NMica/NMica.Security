@@ -2,5 +2,5 @@
 
 public class SpnManagementOptions
 {
-    public string LdapQuery { get; set; }
+    public string? LdapQuery { get; set; }
 }

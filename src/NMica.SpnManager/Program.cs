@@ -44,7 +44,9 @@ services.AddScoped<LdapConnection>(ctx =>
     return connection;
 });
 
-services.AddOptions<SpnManagementOptions>().BindConfiguration("SpnManagement");
+services.AddOptions<SpnManagementOptions>()
+    .BindConfiguration("SpnManagement")
+    .Validate(x => x.LdapQuery != null, "Ldap query must be set to AD container where to search for users");
 
 services.AddAuthorization(opt =>
 {

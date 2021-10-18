@@ -1,6 +1,9 @@
 using System.Security.Cryptography.X509Certificates;
 using AspNetCore.Authentication.ApiKey;
 using JetBrains.Annotations;
+using Kerberos.NET.Client;
+using Kerberos.NET.Configuration;
+using Kerberos.NET.Credentials;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -106,6 +110,9 @@ namespace NMica.SecurityProxy
             services.AddReverseProxy()
                 .LoadFromConfig(Configuration.GetSection("Proxy"))
                 .AddTransforms(ctx => ctx.UseDefaultForwarders = false);
+
+            services.AddSpnManagement();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request

@@ -30,7 +30,7 @@ public class SpnController : ControllerBase
     [Authorize(KnownPolicies.ViewSpn)]
     public async Task<ActionResult<string[]>> GetAll()
     {
-        var accountName = User.Identity.Name.Split("@")[0];
+        var accountName = User.Identity!.Name.Split("@")[0];
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
         if (!searchResults.Any())
@@ -44,7 +44,7 @@ public class SpnController : ControllerBase
     public async Task<ActionResult<string?>> Get(string service, string hostname)
     {
         var spn = $"{service}/{hostname}";
-        var accountName = User.Identity.Name.Split("@")[0];
+        var accountName = User.Identity!.Name.Split("@")[0];
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
         if (!searchResults.Any())
@@ -114,7 +114,7 @@ public class SpnController : ControllerBase
 
     private async Task<SearchResultEntry> GetUserFromLdap()
     {
-        var accountName = User.Identity.Name.Split("@")[0];
+        var accountName = User.Identity!.Name.Split("@")[0];
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
         return searchResults.FirstOrDefault();

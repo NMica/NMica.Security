@@ -95,6 +95,24 @@ Proxy:
 
 
 
+### Automatic SPN management
+
+The included `NMica.SpnManager` API service allows callers to view and create SPNs for their own identity. The callers to SpnManager must authenticate with Kerberos. If they are part of `SpnCreators` AD group, they can add and delete SPNs for their own identity by calling `POST` / `DELETE` to `/spn/<SPN>` endpoint (ex: `/spn/http/myhost.com`). LDAP credentials assigned to `SpnManager` must have sufficient permissions to be able to manage SPNs in the AD.
+
+The proxy can be configured to talk to `SpnManager` service in order to create the necessary SPNs automatically. You can enable this by configuring the following values in config
+
+```yaml
+SpnManagement:
+  Enabled: true
+  ServiceUrl: https://localhost:7167
+  Routes:
+    - https://localhost:7167
+```
+
+Proxy determines own public routes for which SPNs need to be created. The default implementation reads them from `SpnManagement:Routes` section. When running on Cloud Foundry, the routes are read from environmental variable injected by the platform. `IRouteProvider` can be used to provide custom implementation for SPN registrations.   
+
+
+
 ## Egress
 
 The proxy can work in forwarding mode by acquiring Kerberos tickets and appending them to any outgoing requests. This is useful when application running on modern cloud platform needs to communicate to a legacy service secured by Kerberos. The Kerberos ticket will be obtained from Active Directory KDC using Kerberos.NET library and appended to the outgoing request as `Authorize: Negotiate base64(kerb-ticket`. 

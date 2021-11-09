@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "Nmica.SecurityProxy": {
+    "NMica.SecurityProxy": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,

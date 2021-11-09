@@ -1,6 +1,5 @@
 using System.DirectoryServices.Protocols;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using NMica.AspNetCore.Authentication.Spnego;
 using NMica.AspNetCore.Authentication.Spnego.Ldap;
 using NMica.SpnManager;

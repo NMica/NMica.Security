@@ -1,9 +1,8 @@
-﻿namespace NMica.SecurityProxy.Spn
+﻿namespace NMica.SecurityProxy.Spn;
+
+public interface ISpnClient
 {
-    public interface ISpnClient
-    {
-        Task<List<string>> GetAllSpn(CancellationToken cancellationToken = default);
-        Task<bool> AddSpn(string spn);
-        Task<bool> DeleteSpn(string spn);
-    }
+    Task<List<string>> GetAllSpn(CancellationToken cancellationToken = default);
+    Task<bool> AddSpn(string spn);
+    Task<bool> DeleteSpn(string spn);
 }

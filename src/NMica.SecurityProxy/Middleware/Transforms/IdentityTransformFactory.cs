@@ -1,72 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NMica.AspNetCore.Authentication.Spnego;
 using Yarp.ReverseProxy.Transforms.Builder;
 
-namespace NMica.SecurityProxy.Middleware.Transforms
+namespace NMica.SecurityProxy.Middleware.Transforms;
+
+public class IdentityTransformFactory : ITransformFactory
 {
-    public class IdentityTransformFactory : ITransformFactory
+    private readonly IServiceProvider _serviceProvider;
+
+    public IdentityTransformFactory(IServiceProvider serviceProvider)
     {
-        private readonly IServiceProvider _serviceProvider;
+        _serviceProvider = serviceProvider;
+    }
 
-        public IdentityTransformFactory(IServiceProvider serviceProvider)
+    public bool Validate(TransformRouteValidationContext context, IReadOnlyDictionary<string, string> transformValues)
+    {
+        var isHandling = false;
+        if (transformValues.TryGetValue("AuthorizationScheme", out var authorization))
         {
-            _serviceProvider = serviceProvider;
+            if (authorization is not SpnegoAuthenticationDefaults.AuthenticationScheme and not JwtBearerDefaults.AuthenticationScheme)
+            {
+                context.Errors.Add(new ArgumentException($"{authorization} is an unsupported authorization appender scheme"));
+            }
+
+            isHandling = true;
+        }
+        if (transformValues.TryGetValue("RemoveHeader", out var header))
+        {
+            if (string.IsNullOrEmpty(header))
+            {
+                context.Errors.Add(new ArgumentException($"Header name is required"));
+            }
+
+            isHandling = true;
         }
 
-        public bool Validate(TransformRouteValidationContext context, IReadOnlyDictionary<string, string> transformValues)
+        return isHandling;
+    }
+
+    public bool Build(TransformBuilderContext context, IReadOnlyDictionary<string, string> transformValues)
+    {
+        var isHandling = false;
+
+        if (transformValues.TryGetValue("AuthorizationScheme", out var authorization))
         {
-            var isHandling = false;
-            if (transformValues.TryGetValue("AuthorizationScheme", out var authorization))
+            switch (authorization)
             {
-                if (authorization is not SpnegoAuthenticationDefaults.AuthenticationScheme and not JwtBearerDefaults.AuthenticationScheme)
-                {
-                    context.Errors.Add(new ArgumentException($"{authorization} is an unsupported authorization appender scheme"));
-                }
-
-                isHandling = true;
+                case SpnegoAuthenticationDefaults.AuthenticationScheme:
+                    context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<KerberosTicketAppender>(_serviceProvider));
+                    isHandling = true;
+                    break;
+                case JwtBearerDefaults.AuthenticationScheme:
+                    context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<JwtPrincipalAppender>(_serviceProvider));
+                    isHandling = true;
+                    break;
             }
-            if (transformValues.TryGetValue("RemoveHeader", out var header))
-            {
-                if (string.IsNullOrEmpty(header))
-                {
-                    context.Errors.Add(new ArgumentException($"Header name is required"));
-                }
-
-                isHandling = true;
-            }
-
-            return isHandling;
         }
 
-        public bool Build(TransformBuilderContext context, IReadOnlyDictionary<string, string> transformValues)
+        if (transformValues.TryGetValue("RemoveHeader", out var headerName))
         {
-            var isHandling = false;
-
-            if (transformValues.TryGetValue("AuthorizationScheme", out var authorization))
-            {
-                switch (authorization)
-                {
-                    case SpnegoAuthenticationDefaults.AuthenticationScheme:
-                        context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<KerberosTicketAppender>(_serviceProvider));
-                        isHandling = true;
-                        break;
-                    case JwtBearerDefaults.AuthenticationScheme:
-                        context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<JwtPrincipalAppender>(_serviceProvider));
-                        isHandling = true;
-                        break;
-                }
-            }
-
-            if (transformValues.TryGetValue("RemoveHeader", out var headerName))
-            {
-                context.RequestTransforms.Add(new RemoveHeader(headerName));
-                isHandling = true;
-            }
-
-            return isHandling;
+            context.RequestTransforms.Add(new RemoveHeader(headerName));
+            isHandling = true;
         }
+
+        return isHandling;
     }
 }

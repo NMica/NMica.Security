@@ -1,7 +1,6 @@
-﻿namespace NMica.SecurityProxy.Authentication.Forwarding
+﻿namespace NMica.SecurityProxy.Authentication.Forwarding;
+
+public static class ForwardingAuthenticationDefaults
 {
-    public static class ForwardingAuthenticationDefaults
-    {
-        public const string AuthenticationScheme = "Forwarding";
-    }
+    public const string AuthenticationScheme = "Forwarding";
 }

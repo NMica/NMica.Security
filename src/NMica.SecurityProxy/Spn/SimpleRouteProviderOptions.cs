@@ -1,7 +1,6 @@
-namespace NMica.SecurityProxy.Spn
+namespace NMica.SecurityProxy.Spn;
+
+public class SimpleRouteProviderOptions
 {
-    public class SimpleRouteProviderOptions
-    {
-        public List<string> Routes { get; set; } = new();
-    }
+    public List<string> Routes { get; set; } = new();
 }

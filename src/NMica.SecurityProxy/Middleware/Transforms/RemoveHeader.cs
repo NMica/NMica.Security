@@ -1,21 +1,19 @@
-﻿using System.Threading.Tasks;
-using Yarp.ReverseProxy.Transforms;
+﻿using Yarp.ReverseProxy.Transforms;
 
-namespace NMica.SecurityProxy.Middleware.Transforms
+namespace NMica.SecurityProxy.Middleware.Transforms;
+
+public class RemoveHeader : RequestTransform
 {
-    public class RemoveHeader : RequestTransform
+    private readonly string _headerName;
+
+    public RemoveHeader(string headerName)
     {
-        private readonly string _headerName;
+        _headerName = headerName;
+    }
 
-        public RemoveHeader(string headerName)
-        {
-            _headerName = headerName;
-        }
-
-        public override ValueTask ApplyAsync(RequestTransformContext context)
-        {
-            context.ProxyRequest.Headers.Remove(_headerName);
-            return ValueTask.CompletedTask;
-        }
+    public override ValueTask ApplyAsync(RequestTransformContext context)
+    {
+        context.ProxyRequest.Headers.Remove(_headerName);
+        return ValueTask.CompletedTask;
     }
 }

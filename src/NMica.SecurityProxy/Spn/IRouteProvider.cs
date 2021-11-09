@@ -1,7 +1,6 @@
-﻿namespace NMica.SecurityProxy.Spn
+﻿namespace NMica.SecurityProxy.Spn;
+
+public interface IRouteProvider
 {
-    public interface IRouteProvider
-    {
-        public Task<List<string>> GetRoutes();
-    }
+    public Task<List<string>> GetRoutes();
 }

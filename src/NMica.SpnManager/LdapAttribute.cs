@@ -1,6 +1,6 @@
 ﻿namespace NMica.SpnManager;
 
-public class LdapAttribute
+public static class LdapAttribute
 {
     public const string ServicePrincipalName = "servicePrincipalName";
 }

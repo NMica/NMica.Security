@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 
-namespace NMica.SecurityProxy.Authentication.Forwarding
+namespace NMica.SecurityProxy.Authentication.Forwarding;
+
+public class ForwardingAuthenticationOptions : AuthenticationSchemeOptions
 {
-    public class ForwardingAuthenticationOptions : AuthenticationSchemeOptions
-    {
-        public List<string> AuthenticationSchemes { get; set; } = new();
-    }
+    public List<string> AuthenticationSchemes { get; set; } = new();
 }

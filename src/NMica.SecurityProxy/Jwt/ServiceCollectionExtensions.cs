@@ -11,6 +11,11 @@ namespace NMica.SecurityProxy.Jwt
 {
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Adds the minimal components to being able to issue JWT tokens and publish OIDC discovery endpoint with signing key 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
         public static IIdentityServerBuilder AddJwtIssuing(this IServiceCollection services)
         {
             services.AddOptions<JwtIssuingOptions>()
@@ -51,10 +56,8 @@ namespace NMica.SecurityProxy.Jwt
                 .AddInMemoryIdentityResources(Enumerable.Empty<IdentityResource>())
                 .AddInMemoryCaching()
                 .AddInMemoryApiResources(Enumerable.Empty<ApiResource>())
-                .AddInMemoryApiScopes(Enumerable.Empty<ApiScope>())
-
-
-                ;
+                .AddInMemoryApiScopes(Enumerable.Empty<ApiScope>());
+            
             services.Configure<IdentityServerOptions>(opt =>
                 {
                     opt.Endpoints = new EndpointsOptions()

@@ -1,9 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-      <TargetFramework>net5.0</TargetFramework>
+      <TargetFramework>net6.0</TargetFramework>
       <OutputType>Exe</OutputType>
-      <Nullable>enable</Nullable>
       <SignAssembly>false</SignAssembly>
     </PropertyGroup>
 
@@ -11,11 +10,11 @@
       <ProjectReference Include="..\NMica.AspNetCore.Authentication.Spnego\NMica.AspNetCore.Authentication.Spnego.csproj" />
       <PackageReference Include="AspNetCore.Authentication.ApiKey" Version="5.1.0" />
       <PackageReference Include="IdentityServer4" Version="4.1.2" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
       <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
       <PackageReference Include="Steeltoe.Extensions.Configuration.PlaceholderCore" Version="3.1.1" />
       <PackageReference Include="Steeltoe.Security.Authentication.CloudFoundryCore" Version="3.1.1" />
-      <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.12.21451.3" />
+      <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0" />
     </ItemGroup>
     <ItemGroup>
       <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" />

@@ -1,11 +1,8 @@
 using System.DirectoryServices.Protocols;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Options;
-using NMica.AspNetCore.Authentication.Spnego;
 using NMica.AspNetCore.Authentication.Spnego.Ldap;
 
 namespace NMica.SpnManager.Controllers;
@@ -30,7 +27,10 @@ public class SpnController : ControllerBase
     [Authorize(KnownPolicies.ViewSpn)]
     public async Task<ActionResult<string[]>> GetAll()
     {
-        var accountName = User.Identity!.Name.Split("@")[0];
+        if (!TryParseUsername(User.Identity?.Name, out var accountName))
+        {
+            throw new Exception("User identity is not established");
+        }
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
         if (!searchResults.Any())
@@ -44,7 +44,10 @@ public class SpnController : ControllerBase
     public async Task<ActionResult<string?>> Get(string service, string hostname)
     {
         var spn = $"{service}/{hostname}";
-        var accountName = User.Identity!.Name.Split("@")[0];
+        if (!TryParseUsername(User.Identity?.Name, out var accountName))
+        {
+            throw new Exception("User identity is not established");
+        }
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
         if (!searchResults.Any())
@@ -69,7 +72,7 @@ public class SpnController : ControllerBase
         var user = await GetUserFromLdap();
         if (user == null)
         {
-            NotFound($"Caller {User.Identity.Name} not found via LDAP query");
+            return NotFound($"Caller {User.Identity!.Name} not found via LDAP query");
         }
 
         if (user.GetStringArray("servicePrincipalName").Contains(spn))
@@ -94,7 +97,7 @@ public class SpnController : ControllerBase
         var user = await GetUserFromLdap();
         if (user == null)
         {
-            NotFound($"Caller {User.Identity.Name} not found via LDAP query");
+            return NotFound($"Caller {User.Identity!.Name} not found via LDAP query");
         }
 
         if (user.GetStringArray("servicePrincipalName").Contains(spn))
@@ -112,11 +115,36 @@ public class SpnController : ControllerBase
         throw new Exception(response.ErrorMessage);
     }
 
-    private async Task<SearchResultEntry> GetUserFromLdap()
+    private async Task<SearchResultEntry?> GetUserFromLdap()
     {
-        var accountName = User.Identity!.Name.Split("@")[0];
+        if (!TryParseUsername(User.Identity?.Name, out var accountName))
+        {
+            throw new Exception("User identity is not established");
+        }
         var searchRequest = new SearchRequest(_options.LdapQuery,$"(sAMAccountName={accountName})", SearchScope.Subtree, null);
         var searchResults = await _connection.PerformPagedSearch(searchRequest);
+        
         return searchResults.FirstOrDefault();
+    }
+
+    private bool TryParseUsername(string? domainUser, out string username)
+    {
+        username = string.Empty;
+        if (domainUser == null)
+            return false;
+        var emailFormatComponents = domainUser.Split("@"); // user@domain.com
+        if (emailFormatComponents.Length == 2)
+        {
+            username = emailFormatComponents[0];
+            return true;
+        }
+        var legacyUsernameComponents = domainUser.Split(@"\"); // DOMAIN\user
+        if (emailFormatComponents.Length == 2)
+        {
+            username = legacyUsernameComponents[1];
+            return true;
+        }
+
+        return false;
     }
 }

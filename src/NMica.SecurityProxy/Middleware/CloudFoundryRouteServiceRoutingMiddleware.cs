@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Yarp.ReverseProxy.Forwarder;
+﻿using Yarp.ReverseProxy.Forwarder;
 
 namespace NMica.SecurityProxy.Middleware
 {
@@ -27,9 +22,14 @@ namespace NMica.SecurityProxy.Middleware
             string? destinationType = null;
             if(destinations.Count == 1 &&
                (destinations.First().Model.Config.Metadata?.TryGetValue("Type", out destinationType) ?? false) &&
-               destinationType == "route-service" &&
-               context.Request.Headers.TryGetValue("X-CF-Forwarded-Url", out var forwardUrl))
+               destinationType == "route-service")
             {
+                if (!context.Request.Headers.TryGetValue("X-CF-Forwarded-Url", out var forwardUrl))
+                {
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    await context.Response.WriteAsync("Destination is a Cloud Foundry route service, but X-CF-Forwarded-Url is not included");
+                    return;
+                }
                 var transform = new DestinationSelectingTransformer(routeConfig.Transformer);
                 await _httpProxy.SendAsync(context, forwardUrl, clusterConfig.HttpClient, new ForwarderRequestConfig(), transform);
                 return;

@@ -21,8 +21,8 @@ Spnego:
       - LdapAttribute: memberof
         ClaimType: http://schemas.microsoft.com/ws/2008/06/identity/claims/role
     Host: ad.almirex.com # LDAP server 
-    Port: 636
-    UseSsl: true
+    # Port: 389 # // this settings defaults to correct port based on UseSsl (389 or 636)
+    #UseSsl: true
     ValidateServerCertificate: false
     GroupsQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for where groups should be loaded
     GroupsFilter: (objectClass=group) # LDAP filter to groups
@@ -32,7 +32,7 @@ Spnego:
       Domain: ${Spnego:Credentials:Domain}
       Password: ${Spnego:Credentials:Password}
     RefreshFrequency: '00:00:10' # how often should LDAP be checked for changed in AD groups membership 
-ApiKey: mykey
+# ApiKey: mykey
 SpnManagement:
   Enabled: false # change to true to enable SPN management
   ServiceUrl: https://localhost:7167 # url of SPN management service

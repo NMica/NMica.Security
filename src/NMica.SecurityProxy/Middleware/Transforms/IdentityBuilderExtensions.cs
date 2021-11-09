@@ -7,7 +7,7 @@ namespace NMica.SecurityProxy.Middleware.Transforms
     {
         public static TransformBuilderContext AppendJwtPrincipal(this TransformBuilderContext context)
         {
-            var transformer = context.Services.GetRequiredService<JwtPrincipalAppender>();
+            var transformer = ActivatorUtilities.CreateInstance<JwtPrincipalAppender>(context.Services);
             context.RequestTransforms.Add(transformer);
             return context;
         }

@@ -50,11 +50,11 @@ namespace NMica.SecurityProxy.Middleware.Transforms
                 switch (authorization)
                 {
                     case SpnegoAuthenticationDefaults.AuthenticationScheme:
-                        context.RequestTransforms.Add(_serviceProvider.GetRequiredService<KerberosTicketAppender>());
+                        context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<KerberosTicketAppender>(_serviceProvider));
                         isHandling = true;
                         break;
                     case JwtBearerDefaults.AuthenticationScheme:
-                        context.RequestTransforms.Add(_serviceProvider.GetRequiredService<JwtPrincipalAppender>());
+                        context.RequestTransforms.Add(ActivatorUtilities.CreateInstance<JwtPrincipalAppender>(_serviceProvider));
                         isHandling = true;
                         break;
                 }

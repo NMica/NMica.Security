@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Security.Claims;
@@ -22,6 +23,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
     /// <summary>
     /// Transforms current security principal by converting SIDs to AD role names. Mapping is loaded on startup from LDAP
     /// </summary>
+    [SuppressMessage("Interoperability", "CA1416", MessageId = "Validate platform compatibility")]
     public class LdapRolesClaimsTransformer : IStartupFilter, IClaimsTransformation
     {
         private readonly SemaphoreSlim _lock = new(1);
@@ -222,12 +224,17 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);
-            connection.AutoBind = true;
-            // connection.SessionOptions.SecureSocketLayer = options.UseSsl;
-            if (!options.ValidateServerCertificate)
+            // connection.AutoBind = true;
+            if (options.UseSsl)
             {
-                connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
+                connection.SessionOptions.SecureSocketLayer = options.UseSsl;
+                if (!options.ValidateServerCertificate)
+                {
+                    connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
+                }
             }
+
+            
             connection.Bind();
             return connection;
         }

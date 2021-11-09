@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
-      <PackageReference Include="Steeltoe.Extensions.Logging.DynamicLogger" Version="3.1.0" />
-      <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="3.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0-rc.2.21480.10" />
+      <PackageReference Include="Steeltoe.Extensions.Logging.DynamicLogger" Version="3.1.1" />
+      <PackageReference Include="Steeltoe.Management.CloudFoundryCore" Version="3.1.1" />
         <PackageReference Include="ProxyKit" Version="2.0.4" />
 
     </ItemGroup>

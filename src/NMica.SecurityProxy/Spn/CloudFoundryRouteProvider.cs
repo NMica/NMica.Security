@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-
-namespace NMica.SecurityProxy.Middleware
+namespace NMica.SecurityProxy.Spn
 {
     public class CloudFoundryRouteProvider : IRouteProvider
     {

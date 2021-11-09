@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Kerberos.NET.Client;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
-namespace NMica.SecurityProxy.Middleware
+namespace NMica.SecurityProxy.Spn
 {
     public class SpnManagerHostedService : IHostedService
     {

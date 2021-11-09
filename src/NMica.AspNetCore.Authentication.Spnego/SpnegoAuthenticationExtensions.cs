@@ -39,6 +39,11 @@ namespace NMica.AspNetCore.Authentication.Spnego
                         opt.Ldap.UsersQuery = opt.Ldap.GroupsQuery;
                     }
 
+                    if (opt.Ldap.Port == 0)
+                    {
+                        opt.Ldap.Port = opt.Ldap.UseSsl ? 636 : 389;
+                    }
+
                     opt.LdapRolesClaimsTransformer = services.GetRequiredService<IEnumerable<LdapRolesClaimsTransformer>>()
                         .FirstOrDefault(x => x.Name == authenticationScheme);
                 });

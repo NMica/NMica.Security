@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-namespace NMica.SecurityProxy.Middleware
+﻿namespace NMica.SecurityProxy.Spn
 {
     public class SpnManagerOptions 
     {

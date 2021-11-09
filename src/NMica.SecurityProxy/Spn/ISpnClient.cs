@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace NMica.SecurityProxy.Middleware
+﻿namespace NMica.SecurityProxy.Spn
 {
     public interface ISpnClient
     {

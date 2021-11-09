@@ -1,25 +1,15 @@
-﻿using System;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Kerberos.NET;
 using Kerberos.NET.Client;
 using Kerberos.NET.Configuration;
 using Kerberos.NET.Credentials;
-using Kerberos.NET.Crypto;
 using Kerberos.NET.Entities;
 using Kerberos.NET.Transport;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Options;
 using NMica.AspNetCore.Authentication.Spnego;
 
 namespace KerberosUtil
@@ -208,47 +198,8 @@ namespace KerberosUtil
                 throw new Exception("User must be in <user>@<domain> format");
             }
 
-            var domain = split[1];
             return new NetworkCredential(split[0], password, split[1]);
         }
         
-        private static async Task<string> GetSaltFromKdc(string kdc, string username, string password, string domain)
-        {
-            var credential = new KerberosPasswordCredential(username, password, domain);
-            var asReqMessage = KrbAsReq.CreateAsReq(credential, AuthenticationOptions.Renewable);
-            var asReq = asReqMessage.EncodeApplication();
-
-            var config = Krb5Config.Default();
-            config.Realms[domain.ToUpper()].Kdc.Add(kdc);
-            
-            var transport = new KerberosTransportSelector(
-                new IKerberosTransport[]
-                {
-                    new TcpKerberosTransport(null),
-                    new UdpKerberosTransport(null),
-                    new HttpsKerberosTransport(null)
-                },
-                config,
-                null
-            )
-            {
-                ConnectTimeout = TimeSpan.FromSeconds(3)
-            };
-            try
-            {
-                await transport.SendMessage<KrbAsRep>(credential.Domain, asReq);
-            }
-            catch (KerberosProtocolException pex)
-            {
-                var salt = pex?.Error?.DecodePreAuthentication()?
-                    .Where(p => p.Type == PaDataType.PA_ETYPE_INFO2)
-                    .SelectMany(x => x.DecodeETypeInfo2())
-                    .Select(x => x.Salt)
-                    .FirstOrDefault();
-                return salt;
-            }
-            
-            return null;
-        }
     }
 }

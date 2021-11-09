@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Net;
 
-namespace NMica.SecurityProxy.Middleware
+namespace NMica.SecurityProxy.Spn
 {
     public class SpnClient : ISpnClient
     {
@@ -15,12 +9,12 @@ namespace NMica.SecurityProxy.Middleware
         public SpnClient(HttpClient client)
         {
             _client = client;
-            _client.BaseAddress = new Uri(_client.BaseAddress, "spn/");
+            _client.BaseAddress = new Uri(_client.BaseAddress!, "spn/");
         }
 
         public async Task<List<string>> GetAllSpn(CancellationToken cancellationToken = default)
         {
-            return await _client.GetFromJsonAsync<List<string>>("", cancellationToken);
+            return (await _client.GetFromJsonAsync<List<string>>("", cancellationToken))!;
         }
 
         public async Task<bool> AddSpn(string spn)

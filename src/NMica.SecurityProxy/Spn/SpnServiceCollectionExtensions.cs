@@ -1,14 +1,10 @@
-﻿using System;
-using Kerberos.NET.Client;
-using Kerberos.NET.Configuration;
-using Kerberos.NET.Credentials;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Kerberos.NET.Credentials;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NMica.AspNetCore.Authentication.Spnego;
 using Steeltoe.Common;
 
-namespace NMica.SecurityProxy.Middleware
+namespace NMica.SecurityProxy.Spn
 {
     public static class SpnServiceCollectionExtensions
     {
@@ -16,7 +12,7 @@ namespace NMica.SecurityProxy.Middleware
         {
             services.TryAddSingleton(ctx => ctx
                 .GetRequiredService<IOptionsMonitor<SpnegoAuthenticationOptions>>()
-                .Get(SpnegoAuthenticationDefaults.AuthenticationScheme).KerberosClient);
+                .Get(SpnegoAuthenticationDefaults.AuthenticationScheme).KerberosClient!);
             services.TryAddSingleton<KerberosCredential>(ctx =>
             {
                 var networkCredential = ctx.GetRequiredService<IOptionsMonitor<SpnegoAuthenticationOptions>>().Get(SpnegoAuthenticationDefaults.AuthenticationScheme).Credentials;
@@ -43,7 +39,7 @@ namespace NMica.SecurityProxy.Middleware
             services.AddHttpClient<ISpnClient, SpnClient>((ctx, client) =>
                 {
                     var options = ctx.GetRequiredService<IOptionsMonitor<SpnManagerOptions>>().CurrentValue;
-                    client.BaseAddress = new Uri(options.ServiceUrl);
+                    client.BaseAddress = new Uri(options.ServiceUrl!);
                 })
                 .AddHttpMessageHandler<KerberosMessageHandler>();
             services.AddHostedService<SpnManagerHostedService>();

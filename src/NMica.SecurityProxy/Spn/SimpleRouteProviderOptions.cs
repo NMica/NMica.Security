@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace NMica.SecurityProxy.Middleware
+namespace NMica.SecurityProxy.Spn
 {
     public class SimpleRouteProviderOptions
     {

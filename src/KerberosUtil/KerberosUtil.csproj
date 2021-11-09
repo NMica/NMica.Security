@@ -7,7 +7,10 @@
 
     <ItemGroup>
       <PackageReference Include="Kerberos.NET" Version="4.5.115" />
-      <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20253.1" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+      <PackageReference Include="System.CommandLine.Hosting" Version="0.3.0-alpha.21216.1" />
+<!--      <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20253.1" />-->
     </ItemGroup>
 
     <ItemGroup>

@@ -14,7 +14,7 @@ namespace NMica.AspNetCore.Authentication.Spnego
     public class ActiveDirectoryKerberosValidator : IKerberosValidator
     {
         private readonly KerberosPasswordCredential _serviceCredentials;
-        private bool saltCached;
+        private bool _saltCached;
         public ActiveDirectoryKerberosValidator(KerberosPasswordCredential serviceCredentials)
         {
             _serviceCredentials = serviceCredentials;
@@ -25,10 +25,10 @@ namespace NMica.AspNetCore.Authentication.Spnego
 
         public async Task<DecryptedKrbApReq> Validate(ReadOnlyMemory<byte> requestBytes)
         {
-            if (!saltCached)
+            if (!_saltCached)
             {
-                await LoadSaltFromKdc(_serviceCredentials);
-                saltCached = true;
+                await LoadSaltFromKdc();
+                _saltCached = true;
             }
 
             if (_serviceCredentials.Salts?.Any() ?? false)
@@ -64,9 +64,9 @@ namespace NMica.AspNetCore.Authentication.Spnego
             throw new NotImplementedException();
         }
         
-        private async Task LoadSaltFromKdc(KerberosPasswordCredential credential)
+        internal async Task LoadSaltFromKdc()
         {
-            var asReqMessage = KrbAsReq.CreateAsReq(credential, AuthenticationOptions.Renewable);
+            var asReqMessage = KrbAsReq.CreateAsReq(_serviceCredentials, AuthenticationOptions.Renewable);
             var asReq = asReqMessage.EncodeApplication();
 
             
@@ -85,14 +85,14 @@ namespace NMica.AspNetCore.Authentication.Spnego
             };
             try
             {
-                await transport.SendMessage<KrbAsRep>(credential.Domain, asReq);
+                await transport.SendMessage<KrbAsRep>(_serviceCredentials.Domain, asReq);
             }
             catch (KerberosProtocolException pex)
             {
                 var paData = pex?.Error?.DecodePreAuthentication();
                 if (paData != null)
                 {
-                    credential.IncludePreAuthenticationHints(paData);
+                    _serviceCredentials.IncludePreAuthenticationHints(paData);
                 }
             }
         }

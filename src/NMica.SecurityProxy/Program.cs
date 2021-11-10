@@ -19,10 +19,8 @@ using Steeltoe.Security.Authentication.Mtls;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.Dispose();
 builder.Configuration
-    .AddJsonFile("appsettings.json")
     .AddYamlFile("appsettings.yaml")
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
-    .AddYamlFile($"appsettings.{builder.Environment.EnvironmentName}.yaml")
+    .AddYamlFile($"appsettings.{builder.Environment.EnvironmentName}.yaml", optional: true)
     .AddEnvironmentVariables()
     .AddCommandLine(args)
     .AddPlaceholderResolver();
@@ -53,7 +51,7 @@ services.AddAuthentication(opt =>
             ValidateIssuer = false,
         };
     })
-    .AddSpnego(options =>
+    .AddSpnego(options => 
     {
         config.GetSection("Spnego").Bind(options);
     });

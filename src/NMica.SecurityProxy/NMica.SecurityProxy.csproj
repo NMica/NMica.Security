@@ -4,6 +4,8 @@
       <TargetFramework>net6.0</TargetFramework>
       <OutputType>Exe</OutputType>
       <SignAssembly>false</SignAssembly>
+      <DebugType>full</DebugType>
+      <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,8 +19,8 @@
       <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0" />
     </ItemGroup>
     <ItemGroup>
-      <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" />
-      <None Update="appsettings.*.yaml" CopyToOutputDirectory="PreserveNewest" />
+      <None Update="appsettings.yaml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+      <None Update="appsettings.*.yaml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

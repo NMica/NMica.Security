@@ -29,7 +29,6 @@ Spnego:
     UsersQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for users
     Credentials: # LDAP credentials (defaults to same as SPN credentials)
       UserName: ${Spnego:Credentials:UserName}
-      Domain: ${Spnego:Credentials:Domain}
       Password: ${Spnego:Credentials:Password}
     RefreshFrequency: '00:00:10' # how often should LDAP be checked for changed in AD groups membership 
 # ApiKey: mykey

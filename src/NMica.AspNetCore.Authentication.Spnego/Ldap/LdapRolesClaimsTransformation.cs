@@ -209,7 +209,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
         private LdapConnection GetConnection(LdapOptions options)
         {
             var di = new LdapDirectoryIdentifier(server: options.Host, options.Port, fullyQualifiedDnsHostName: true, connectionless: false);
-            var connection = new LdapConnection(di, options.Credentials);
+            var connection = new LdapConnection(di, options.Credentials, AuthType.Basic);
             connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);

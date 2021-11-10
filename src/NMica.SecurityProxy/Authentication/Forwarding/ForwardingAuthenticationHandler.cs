@@ -51,37 +51,4 @@ public class ForwardingAuthenticationHandler : AuthenticationHandler<ForwardingA
     {
         return Task.FromResult(AuthenticateResult.NoResult());
     }
-    //
-    // protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
-    // {
-    //     if (!Context.Request.Headers.TryGetValue("Authorization", out var authorizationHeaderValue))
-    //     {
-    //         return AuthenticateResult.NoResult();
-    //     }
-    //
-    //     var authorizationHeaderParts = authorizationHeaderValue.ToString().Split(" ");
-    //     if (authorizationHeaderParts.Length != 2)
-    //     {
-    //         return AuthenticateResult.NoResult();
-    //     }
-    //     var scheme = authorizationHeaderParts[0];
-    //     if (await _authenticationSchemeProvider.GetSchemeAsync(scheme) != null)
-    //     {
-    //         return await _authenticationService.AuthenticateAsync(Context, scheme);
-    //     }
-    //     return AuthenticateResult.NoResult();
-    //
-    // }
-    //
-    // protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
-    // {
-    //     var defaultChallengeSchemeAsync = await _authenticationSchemeProvider.GetDefaultChallengeSchemeAsync();
-    //     if (defaultChallengeSchemeAsync == null || defaultChallengeSchemeAsync.HandlerType == GetType())
-    //     {
-    //         Context.Response.StatusCode = 401;
-    //         return;
-    //     }
-    //     await _authenticationService.ChallengeAsync(Context, defaultChallengeSchemeAsync.Name, properties);
-    // }
-
 }

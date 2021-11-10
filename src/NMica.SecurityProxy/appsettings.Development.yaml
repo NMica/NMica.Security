@@ -3,3 +3,6 @@ Logging:
     Default: Debug
     Microsoft: Trace
     Microsoft.Hosting.Lifetime: Information
+Spnego:
+  Ldap:
+    ValidateServerCertificate: false

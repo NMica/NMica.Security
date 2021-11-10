@@ -1,0 +1,10 @@
+---
+applications:
+- name: KerberosProxy
+  buildpacks: 
+    - binary_buildpack
+  command: "./NMica.SecurityProxy --urls http://0.0.0.0:8080"
+  path: src/NMica.SecurityProxy/bin/Debug/net6.0/linux-x64/publish
+  memory: 256M
+  env:
+    LDAPTLS_REQCERT: never

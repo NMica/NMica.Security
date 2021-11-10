@@ -23,7 +23,7 @@ Spnego:
     Host: ad.almirex.com # LDAP server 
     # Port: 389 # // this settings defaults to correct port based on UseSsl (389 or 636)
     UseSsl: true
-    ValidateServerCertificate: false
+    ValidateServerCertificate: true
     GroupsQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for where groups should be loaded
     GroupsFilter: (objectClass=group) # LDAP filter to groups
     UsersQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for users

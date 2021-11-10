@@ -213,6 +213,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);
+            connection.AutoBind = true;
             if (options.UseSsl)
             {
                 connection.SessionOptions.SecureSocketLayer = options.UseSsl;

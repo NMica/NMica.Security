@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NMica.AspNetCore.Authentication.Spnego;
+using NMica.AspNetCore.Authentication.Spnego.HttpClient;
 using Steeltoe.Common;
 
 namespace NMica.SecurityProxy.Spn;

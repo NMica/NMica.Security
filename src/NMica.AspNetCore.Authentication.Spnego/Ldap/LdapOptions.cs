@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
+using JetBrains.Annotations;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
+    [PublicAPI]
     public class LdapOptions
     {
         public List<ClaimMapping> Claims { get; set; } = new();
         public string? Host { get; set; }
-        public int Port { get; set; } = 389;
-        public bool UseSsl { get; set; } = false;
+        public int Port { get; set; }
+        public bool UseSsl { get; set; }
         public bool ValidateServerCertificate { get; set; } = true; 
         public NetworkCredential? Credentials { get; set; } = new();
         public string GroupsFilter { get; set; } = "(objectClass=group)";

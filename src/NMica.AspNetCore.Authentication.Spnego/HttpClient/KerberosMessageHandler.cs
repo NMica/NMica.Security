@@ -1,14 +1,9 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
 using JetBrains.Annotations;
 using Kerberos.NET.Client;
-using Kerberos.NET.Configuration;
 using Kerberos.NET.Credentials;
 
-namespace NMica.AspNetCore.Authentication.Spnego
+namespace NMica.AspNetCore.Authentication.Spnego.HttpClient
 {
     [PublicAPI]
     public class KerberosMessageHandler : DelegatingHandler 

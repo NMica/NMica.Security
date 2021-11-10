@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NMica.AspNetCore.Authentication.Spnego.Configuration;
 using NMica.AspNetCore.Authentication.Spnego.Ldap;

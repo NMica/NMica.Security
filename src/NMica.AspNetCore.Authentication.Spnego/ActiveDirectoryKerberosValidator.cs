@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security;
-using System.Threading.Tasks;
+﻿using System.Security;
 using Kerberos.NET;
 using Kerberos.NET.Client;
 using Kerberos.NET.Credentials;

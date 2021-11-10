@@ -1,22 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Kerberos.NET;
-using Kerberos.NET.Configuration;
 using Kerberos.NET.Credentials;
-using Kerberos.NET.Crypto;
-using Kerberos.NET.Entities;
-using Kerberos.NET.Transport;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using AuthenticationOptions = Kerberos.NET.Client.AuthenticationOptions;
 
 namespace NMica.AspNetCore.Authentication.Spnego
 {

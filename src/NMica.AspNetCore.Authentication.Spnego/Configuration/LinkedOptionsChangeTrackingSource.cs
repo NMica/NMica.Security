@@ -1,4 +1,3 @@
-using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;

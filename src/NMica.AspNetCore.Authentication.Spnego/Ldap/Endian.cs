@@ -1,6 +1,4 @@
-﻿﻿using System;
-
- namespace NMica.AspNetCore.Authentication.Spnego.Ldap
+﻿﻿ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
     internal static class Endian
     {

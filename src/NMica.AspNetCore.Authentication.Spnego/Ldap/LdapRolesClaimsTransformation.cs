@@ -1,22 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SearchScope = System.DirectoryServices.Protocols.SearchScope;
-
-// using Novell.Directory.Ldap;
-// using LdapConnection = Novell.Directory.Ldap.LdapConnection;
 
 namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 {
@@ -33,7 +22,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
         private DateTime _lastRefreshTime;
         private Timer? _refreshTimer;
         private readonly IOptionsMonitor<LdapOptions> _options;
-        private bool _isInitialized = false;
+        private bool _isInitialized;
         private LdapConnection _connection;
 
         public string Name { get; }
@@ -224,13 +213,19 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             connection.SessionOptions.ReferralChasing = ReferralChasingOptions.None;
             connection.SessionOptions.ProtocolVersion = 3; //Setting LDAP Protocol to latest version
             connection.Timeout = TimeSpan.FromMinutes(1);
-            // connection.AutoBind = true;
             if (options.UseSsl)
             {
                 connection.SessionOptions.SecureSocketLayer = options.UseSsl;
                 if (!options.ValidateServerCertificate)
                 {
-                    connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
+                    if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                    {
+                        connection.SessionOptions.VerifyServerCertificate = (ldapConnection, certificate) => true;
+                    }
+                    else if (!Environment.GetEnvironmentVariables().Contains("LDAPTLS_REQCERT"))
+                    {
+                        _logger.LogWarning("LDAPS certificate validation is disabled in config, but LDAPTLS_REQCERT environmental variable is not set. On non-Windows environments certificate validation must be disabled by setting environmental variable LDAPTLS_REQCERT to 'never'");
+                    }
                 }
             }
 
@@ -340,7 +335,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
                         {
                             byte[] bytes => Encoding.UTF8.GetString(bytes),
                             string str => str,
-                            object other => other.ToString()
+                            { } other => other.ToString()
                         };
                         identity.AddClaim(new Claim(claimMapping.ClaimType, attributeValueStr!));
                     }
@@ -352,7 +347,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
         private void ReplaceGroupSidsWithNames(ClaimsPrincipal principal)
         {
             var identity = (ClaimsIdentity) principal.Identity!;
-            var claimsToAdd = identity!.Claims
+            var claimsToAdd = identity.Claims
                 .Where(x => x.Type == ClaimTypes.GroupSid)
                 .Select(x => x.Value)
                 .SelectMany(sid =>
@@ -374,7 +369,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
             identity.AddClaims(claimsToAdd);
 
             // remove all sid based claims
-            var claimsToRemove = identity!.Claims.Where(x => x.Type == ClaimTypes.GroupSid).ToArray();
+            var claimsToRemove = identity.Claims.Where(x => x.Type == ClaimTypes.GroupSid).ToArray();
             foreach (var claim in claimsToRemove)
             {
                 identity.RemoveClaim(claim);
@@ -385,11 +380,11 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
         private struct SimpleGroup
         {
-            public string Sid { get; set; }
+            public string Sid { get; init; }
             // ReSharper disable once InconsistentNaming
-            public string sAMAccountName { get; set; }
-            public string DistinguishedName { get; set; }
-            public string[] MemberOfDNs { get; set; }
+            public string sAMAccountName { get; init; }
+            public string DistinguishedName { get; init; }
+            public string[] MemberOfDNs { get; init; }
         }
     }
 }

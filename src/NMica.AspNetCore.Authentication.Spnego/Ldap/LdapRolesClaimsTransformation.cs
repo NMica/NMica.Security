@@ -182,12 +182,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
                 var searchRequest = new SearchRequest(options.GroupsQuery!, updatesFilter, SearchScope.Subtree, attributes);
                 searchRequest.Controls.Add(new PageResultRequestControl(1));
-                var searchResponse = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
-                    _connection.BeginSendRequest,
-                    _connection.EndSendRequest,
-                    searchRequest,
-                    PartialResultProcessing.NoPartialResultSupport,
-                    null);
+                var searchResponse = await _connection.ExecuteRequest<SearchResponse>(searchRequest);
 
                 var isUpdated = searchResponse.Entries.Count > 0;
                 if (isUpdated)
@@ -303,14 +298,7 @@ namespace NMica.AspNetCore.Authentication.Spnego.Ldap
 
             
             var searchRequest = new SearchRequest(options.UsersQuery, $"(objectSid={userSid})", SearchScope.Subtree, attributesToLoad);
-            var searchResponse = (SearchResponse) await Task<DirectoryResponse>.Factory.FromAsync(
-                _connection.BeginSendRequest,
-                _connection.EndSendRequest,
-                searchRequest,
-                PartialResultProcessing.NoPartialResultSupport,
-                null);
-
-
+            var searchResponse = await _connection.ExecuteRequest<SearchResponse>(searchRequest);
             var userLdapEntry = searchResponse.Entries.Cast<SearchResultEntry>().FirstOrDefault();
             if (userLdapEntry == null)
             {

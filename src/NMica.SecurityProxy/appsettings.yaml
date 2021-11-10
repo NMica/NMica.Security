@@ -30,7 +30,7 @@ Spnego:
     Credentials: # LDAP credentials (defaults to same as SPN credentials)
       UserName: ${Spnego:Credentials:UserName}
       Password: ${Spnego:Credentials:Password}
-    RefreshFrequency: '00:00:10' # how often should LDAP be checked for changed in AD groups membership 
+    RefreshFrequency: '00:05:00' # how often should LDAP be checked for changed in AD groups membership 
 # ApiKey: mykey
 SpnManagement:
   Enabled: false # change to true to enable SPN management

@@ -22,7 +22,7 @@ Spnego:
         ClaimType: http://schemas.microsoft.com/ws/2008/06/identity/claims/role
     Host: ad.almirex.com # LDAP server 
     # Port: 389 # // this settings defaults to correct port based on UseSsl (389 or 636)
-    #UseSsl: true
+    UseSsl: true
     ValidateServerCertificate: false
     GroupsQuery: CN=Users,DC=almirex,DC=dc # LDAP OU for where groups should be loaded
     GroupsFilter: (objectClass=group) # LDAP filter to groups

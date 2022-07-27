@@ -1,6 +1,6 @@
 ## Kerberos Authentication Proxy
 
-This project allows placing a bi-directional transparent proxy for the app that transforms Kerberos tickets into JWT. **This allows authenticating Kerberos clients without having to run on domain joined Windows machine or configuring MIT Kerberos on Linux, and works on any platform supported by .NET 5 (Windows, Linux, OSX)**. This solution works very well for supporting legacy apps when adopting cloud and container based environments.  When configured for ingress it will validate incoming Kerberos tickets in HTTP [SPNEGO](https://en.wikipedia.org/wiki/SPNEGO).  This project allows solving for Kerberos authentication scenarios when ticket is transmitted via HTTP Negotiate header (aka Integrated Windows Authentication) header and send user's principal to downstream app as a standard JWT Bearer token. When configured for egress it will authenticate the app using authentication method of choice (MTLs is recommended), acquire Kerberos tickets on application behalf and append it to outgoing request. This approach works for applications that are using HTTP Header to transmit to Kerberos ticket, such as:
+This project allows placing a bi-directional transparent proxy for the app that transforms Kerberos tickets into JWT. **This allows authenticating Kerberos clients without having to run on domain joined Windows machine or configuring MIT Kerberos on Linux, and works on any platform supported by .NET 6 (Windows, Linux, OSX)**. This solution works very well for supporting legacy apps when adopting cloud and container based environments.  When configured for ingress it will validate incoming Kerberos tickets in HTTP [SPNEGO](https://en.wikipedia.org/wiki/SPNEGO).  This project allows solving for Kerberos authentication scenarios when ticket is transmitted via HTTP Negotiate header (aka Integrated Windows Authentication) header and send user's principal to downstream app as a standard JWT Bearer token. When configured for egress it will authenticate the app using authentication method of choice (MTLs is recommended), acquire Kerberos tickets on application behalf and append it to outgoing request. This approach works for applications that are using HTTP Header to transmit to Kerberos ticket, such as:
 
 - Front end web applications
 - WCF services with `basicHttpBinding`, and transport level Windows security (requires using JWT WCF middleware)
@@ -168,7 +168,7 @@ For egress scenarios, when proxy and calling apps are both running on the platfo
 
 ## How to build
 
-- Install [.NET Core 5.0 SDK](<https://dotnet.microsoft.com/download>)
+- Install [.NET Core 6.0 SDK](<https://dotnet.microsoft.com/download>)
 - Run `dotnet publish`
 
 ## Troubleshooting
